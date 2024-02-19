@@ -1,0 +1,88 @@
+const wineIds = ["123", "234", "345", "456"];
+
+const wineClassesMap = new Map([
+  ["Red Wine", "1"],
+  ["White Wine", "2"],
+  ["Sparkling Wine", "3"],
+  ["Dessert Wine", "4"],
+  ["Fortified Wine", "5"],
+  ["Flavored/Fruit Wines", "6"],
+  ["Mead", "7"],
+]);
+
+const sourceSheetId = "1N_wonyARABlhBUDAlqqv9vTCGHP6crqrfdzgcv7_cNo";
+
+function generateForms() {
+  var sourceSheet = SpreadsheetApp.openById(sourceSheetId);
+  var data = sourceSheet.getDataRange().getValues();
+  var header = data.shift();
+
+  const allWines = [];
+  const flights = new Map();
+
+  if (data.length <= 0) {
+    throw new Error("No data found. Confirm source sheet ID");
+  }
+
+  const displayIdIndex = header
+    .map((value) => value.toString().toLowerCase())
+    .indexOf("displayid");
+  const categoryIndex = header
+    .map((value) => value.toString().toLowerCase())
+    .indexOf("category code");
+
+  for (var i = 0; i < data.length; i++) {
+    const row = data[i];
+
+    const displayId = row[displayIdIndex];
+    const category = row[categoryIndex];
+
+    allWines.push({ displayId, category });
+  }
+
+  wineClassesMap.forEach((wineClassCode, className) => {
+    const timestamp = new Date().toLocaleString();
+    const resultsSheetTitle = `Stampede Cellar Round 2 Results - ${className} - ${timestamp}`;
+    const resultsSheet = SpreadsheetApp.create(resultsSheetTitle);
+
+    const filteredWines = allWines.filter((wine) => {
+      return wine.category === wineClassCode;
+    });
+
+    if (filteredWines.length > 0) {
+      const form = FormApp.create(`Round 2 - ${className} - ${timestamp}`);
+      const formItems = [];
+
+      const sectionHeader = form.addSectionHeaderItem();
+
+      sectionHeader.setTitle(`Select your top 15 entrants - ${className}`);
+
+      for (let i = 0; i < 3; i++) {
+        const item = form.addListItem();
+        item.setTitle(`Rank ${i + 1}`);
+        item.setRequired(true);
+
+        formItems.push(item);
+      }
+
+      let choices = [];
+
+      filteredWines
+        .sort((a, b) => a.displayId - b.displayId)
+        .forEach((wine) => {
+          const choiceValue = wine.displayId;
+
+          choices.push(formItems[0].createChoice(choiceValue));
+        });
+
+      formItems.forEach((item) => {
+        item.setChoices(choices);
+      });
+
+      form.setDestination(
+        FormApp.DestinationType.SPREADSHEET,
+        resultsSheet.getId()
+      );
+    }
+  });
+}
