@@ -18,7 +18,6 @@ function generateForms() {
   var header = data.shift();
 
   const allWines = [];
-  const flights = new Map();
 
   if (data.length <= 0) {
     throw new Error("No data found. Confirm source sheet ID");

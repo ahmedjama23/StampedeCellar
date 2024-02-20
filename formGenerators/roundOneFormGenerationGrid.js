@@ -52,16 +52,18 @@ function generateFlightForms() {
     nameInput.setTitle("Name");
     nameInput.setRequired(true);
 
-    flightWines.forEach((wine) => {
-      const multipleChoiceItem = flightForm.addMultipleChoiceItem();
-      multipleChoiceItem.setRequired(true);
+    const gridItem = flightForm.addGridItem();
+    gridItem.setRequired(true);
 
-      multipleChoiceItem.setTitle(
-        `Position ${wine.position}: Wine Id ${wine.displayId}`
-      );
+    gridItem
+      .setTitle("Please provide your evaluation of the following entrants")
+      .setRows(
+        flightWines.map(
+          (wine) => `Position ${wine.position}: ${wine.displayId}`
+        )
+      )
+      .setColumns(["Gold", "Silver", "Bronze"]);
 
-      multipleChoiceItem.setChoiceValues(["Gold", "Silver", "Bronze"]);
-    });
     flightForm.setDestination(
       FormApp.DestinationType.SPREADSHEET,
       resultsSheet.getId()
