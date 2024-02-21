@@ -25,7 +25,7 @@ function generateFlightForms() {
     .map((value) => value.toString().toLowerCase())
     .indexOf("flight position");
 
-  for (var i = 0; i < 5; i++) {
+  for (var i = 0; i < data.length; i++) {
     const row = data[i];
 
     const displayId = row[displayIdIndex];
@@ -52,16 +52,23 @@ function generateFlightForms() {
     nameInput.setTitle("Name");
     nameInput.setRequired(true);
 
-    flightWines.forEach((wine) => {
-      const multipleChoiceItem = flightForm.addMultipleChoiceItem();
-      multipleChoiceItem.setRequired(true);
+    const gridItem = flightForm.addGridItem();
+    gridItem.setRequired(true);
+    gridItem.setHelpText(
+      `Please provide your evaluation of the following entrants:`
+    );
 
-      multipleChoiceItem.setTitle(
-        `Position ${wine.position}: Wine Id ${wine.displayId}`
-      );
+    gridItem
+      .setRows(flightWines.map((wine) => `${wine.displayId}`))
+      .setColumns(["Gold", "Silver", "Bronze"]);
 
-      multipleChoiceItem.setChoiceValues(["Gold", "Silver", "Bronze"]);
-    });
+    const favouritesListItem = flightForm.addListItem();
+    favouritesListItem.setChoiceValues(
+      flightWines.map((wine) => wine.displayId)
+    );
+    favouritesListItem.setRequired(true);
+    favouritesListItem.setTitle("Select your favourite entrant:");
+
     flightForm.setDestination(
       FormApp.DestinationType.SPREADSHEET,
       resultsSheet.getId()

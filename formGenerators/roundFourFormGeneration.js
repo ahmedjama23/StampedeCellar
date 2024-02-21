@@ -1,9 +1,9 @@
 const sourceSheetId = "1wrL_tY76yQX_lSys7QGA8blQ85v84UwK0cJN2rVjLYA";
+const numRanks = 5;
 
 function generateForms() {
   var sourceSheet = SpreadsheetApp.openById(sourceSheetId);
   var data = sourceSheet.getSheetByName("R3 Out").getDataRange().getValues();
-  var header = data.shift();
 
   const allWines = [];
 
@@ -12,13 +12,17 @@ function generateForms() {
   }
 
   const displayIdIndex = 1;
+  const rankScoreIndex = 13;
 
   for (var i = 0; i < data.length; i++) {
     const row = data[i];
 
     const displayId = row[displayIdIndex];
+    const rankScore = row[rankScoreIndex];
 
-    allWines.push({ displayId });
+    if (typeof displayId === "number" && typeof rankScore === "number") {
+      allWines.push({ displayId, rankScore });
+    }
   }
 
   const timestamp = new Date().toLocaleString();
@@ -39,7 +43,7 @@ function generateForms() {
 
   const sectionHeader = form.addSectionHeaderItem();
 
-  sectionHeader.setTitle(`Select your top 10 entrants`);
+  sectionHeader.setTitle(`Select your top ${numRanks} entrants`);
 
   for (let i = 0; i < 5; i++) {
     const item = form.addListItem();
@@ -52,6 +56,8 @@ function generateForms() {
   let choices = new Set();
 
   allWines
+    .sort((a, b) => a.rankScore - b.rankScore)
+    .slice(0, numRanks)
     .sort((a, b) => a.displayId - b.displayId)
     .map((wine) => choices.add(wine.displayId));
 

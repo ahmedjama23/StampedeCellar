@@ -8,8 +8,9 @@ const wineClassesMap = new Map([
   ["Mead", "7"],
 ]);
 
-const sourceSheetId = "1wrL_tY76yQX_lSys7QGA8blQ85v84UwK0cJN2rVjLYA";
-const roundTwoThreshold = 200;
+const sourceSheetId = "1oS-h0B_ZqHab6qNpuytieM448s6Cg2dYlug7x_ynl90";
+const roundTwoThreshold = 3;
+const numRanks = 15;
 
 function generateForms() {
   var sourceSheet = SpreadsheetApp.openById(sourceSheetId);
@@ -33,22 +34,29 @@ function generateForms() {
     const category = row[categoryIndex];
     const score = row[scoreIndex];
 
+    if (
+      typeof displayId === "number" &&
+      typeof category === "number" &&
+      typeof score === "number"
+    ) {
+      allWines.push({ displayId, rankScore });
+    }
     allWines.push({ displayId, category, score });
   }
 
   wineClassesMap.forEach((wineClassCode, className) => {
-    const timestamp = new Date().toLocaleString();
-    const resultsSheetTitle = `Stampede Cellar Round 2 Results - ${className} - ${timestamp}`;
-    const resultsSheet = SpreadsheetApp.create(resultsSheetTitle);
-
     const filteredWines = allWines.filter((wine) => {
       return (
         wine.category.toString().charAt(0) === wineClassCode &&
-        score >= roundTwoThreshold
+        wine.score >= roundTwoThreshold
       );
     });
 
     if (filteredWines.length > 0) {
+      const timestamp = new Date().toLocaleString();
+      const resultsSheetTitle = `Stampede Cellar Round 2 Results - ${className} - ${timestamp}`;
+      const resultsSheet = SpreadsheetApp.create(resultsSheetTitle);
+
       const form = FormApp.create(`Round 2 - ${className} - ${timestamp}`);
       const formItems = [];
 
@@ -63,9 +71,11 @@ function generateForms() {
 
       const sectionHeader = form.addSectionHeaderItem();
 
-      sectionHeader.setTitle(`Select your top 15 entrants - ${className}`);
+      sectionHeader.setTitle(
+        `Select your top ${numRanks} entrants - ${className}`
+      );
 
-      for (let i = 0; i < 15; i++) {
+      for (let i = 0; i < numRanks; i++) {
         const item = form.addListItem();
         item.setTitle(`Rank ${i + 1}`);
         item.setRequired(true);
