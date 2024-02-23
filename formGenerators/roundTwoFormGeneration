@@ -8,8 +8,8 @@ const wineClassesMap = new Map([
   ["Mead", "7"],
 ]);
 
-const sourceSheetId = "1oS-h0B_ZqHab6qNpuytieM448s6Cg2dYlug7x_ynl90";
-const roundTwoThreshold = 3;
+const sourceSheetId = "1wrL_tY76yQX_lSys7QGA8blQ85v84UwK0cJN2rVjLYA";
+const roundTwoThreshold = 410;
 const numRanks = 15;
 
 function generateForms() {
@@ -39,9 +39,8 @@ function generateForms() {
       typeof category === "number" &&
       typeof score === "number"
     ) {
-      allWines.push({ displayId, rankScore });
+      allWines.push({ displayId, category, score });
     }
-    allWines.push({ displayId, category, score });
   }
 
   wineClassesMap.forEach((wineClassCode, className) => {

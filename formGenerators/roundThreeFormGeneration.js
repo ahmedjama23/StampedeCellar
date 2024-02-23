@@ -1,4 +1,4 @@
-const sourceSheetId = "1oS-h0B_ZqHab6qNpuytieM448s6Cg2dYlug7x_ynl90";
+const sourceSheetId = "1wrL_tY76yQX_lSys7QGA8blQ85v84UwK0cJN2rVjLYA";
 const numRanks = 10;
 
 function generateForms() {
@@ -45,7 +45,7 @@ function generateForms() {
 
   sectionHeader.setTitle(`Select your top ${numRanks} entrants`);
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < numRanks; i++) {
     const item = form.addListItem();
     item.setTitle(`Rank ${i + 1}`);
     item.setRequired(true);

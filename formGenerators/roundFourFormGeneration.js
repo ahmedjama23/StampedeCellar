@@ -45,7 +45,7 @@ function generateForms() {
 
   sectionHeader.setTitle(`Select your top ${numRanks} entrants`);
 
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < numRanks; i++) {
     const item = form.addListItem();
     item.setTitle(`Rank ${i + 1}`);
     item.setRequired(true);
