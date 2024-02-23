@@ -1,4 +1,4 @@
-const sourceSheetId = "1EBqsWChNdoBq74M1UAUAgqwg0SgfQRn0W2tiRw7urk4";
+const sourceSheetId = "1LMXzMnt357iqCvExyxM1RjCYhW4HWwktP0a2JNlGPxo";
 
 function generateFlightForms() {
   var sourceSheet = SpreadsheetApp.openById(sourceSheetId);
@@ -24,20 +24,37 @@ function generateFlightForms() {
   const flightPositionIndex = header
     .map((value) => value.toString().toLowerCase())
     .indexOf("flight position");
+  const awardClassIndex = header
+    .map((value) => value.toString().toLowerCase())
+    .indexOf("award class");
 
-  for (var i = 0; i < data.length; i++) {
+  for (var i = 0; i < 150; i++) {
     const row = data[i];
 
     const displayId = row[displayIdIndex];
     const flightNumber = row[flightNumberIndex];
     const position = row[flightPositionIndex];
+    const awardClass = row[awardClassIndex];
 
-    allWines.push({ displayId, flightNumber, position });
-    flights.set(flightNumber, flightNumber);
+    if (
+      typeof displayId === "number" &&
+      typeof flightNumber === "number" &&
+      typeof position !== "undefined"
+    ) {
+      allWines.push({ displayId, flightNumber, position, awardClass });
+      flights.set(flightNumber, flightNumber);
+    }
   }
 
   flights.forEach((flight) => {
     const flightWines = allWines.filter((wine) => wine.flightNumber === flight);
+    const classSet = new Set(
+      flightWines.map((wine) => {
+        return wine.awardClass;
+      })
+    );
+    const awardClasses = Array.from(classSet);
+
     let flightForm;
     if (flightWines.length > 0) {
       flightForm = FormApp.create(`Stampede Cellar Round 1 - Flight ${flight}`);
@@ -52,22 +69,38 @@ function generateFlightForms() {
     nameInput.setTitle("Name");
     nameInput.setRequired(true);
 
-    const gridItem = flightForm.addGridItem();
-    gridItem.setRequired(true);
-    gridItem.setHelpText(
-      `Please provide your evaluation of the following entrants:`
-    );
+    awardClasses.forEach((awardClass) => {
+      const classWines = flightWines.filter(
+        (wine) => wine.awardClass === awardClass
+      );
+      const sectionHeader = flightForm.addSectionHeaderItem();
+      sectionHeader.setTitle(`Award Class: ${awardClass}`);
 
-    gridItem
-      .setRows(flightWines.map((wine) => `${wine.displayId}`))
-      .setColumns(["Gold", "Silver", "Bronze"]);
+      const gridItem = flightForm.addGridItem();
+      gridItem.setRequired(true);
+      gridItem.setHelpText(
+        `Please provide your evaluation of the following entrants:`
+      );
 
-    const favouritesListItem = flightForm.addListItem();
-    favouritesListItem.setChoiceValues(
-      flightWines.map((wine) => wine.displayId)
-    );
-    favouritesListItem.setRequired(true);
-    favouritesListItem.setTitle("Select your favourite entrant:");
+      gridItem
+        .setRows(classWines.map((wine) => `${wine.displayId}`))
+        .setColumns(["Gold", "Silver", "Bronze"]);
+    });
+
+    awardClasses.forEach((awardClass) => {
+      const classWines = flightWines.filter(
+        (wine) => wine.awardClass === awardClass
+      );
+
+      const favouritesListItem = flightForm.addListItem();
+      favouritesListItem.setChoiceValues(
+        classWines.map((wine) => wine.displayId)
+      );
+      favouritesListItem.setRequired(true);
+      favouritesListItem.setTitle(
+        `Select your favourite entrant of award class ${awardClass}:`
+      );
+    });
 
     flightForm.setDestination(
       FormApp.DestinationType.SPREADSHEET,
